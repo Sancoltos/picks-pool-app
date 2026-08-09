@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap');
+
+html, body { margin: 0; padding: 0; }
+
+#pp-root {
+  --bg: #FAF9F5;
+  --ink: #16241C;
+  --ink-soft: #3E4E45;
+  --field: #1F4D36;
+  --field-dark: #143324;
+  --gold: #D9A227;
+  --gold-dark: #B37F17;
+  --line: #DDD7C6;
+  --danger: #B23B3B;
+  --danger-bg: #FBEAEA;
+  --success: #2F7D4F;
+  --success-bg: #EAF4EE;
+  --card: #FFFFFF;
+
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+#pp-root * { box-sizing: border-box; }
+#pp-root .display { font-family: 'Bebas Neue', 'Inter', sans-serif; letter-spacing: 0.03em; }
+#pp-root button, #pp-root input, #pp-root select { font-family: inherit; font-size: inherit; }
+
+#pp-root button:focus-visible,
+#pp-root input:focus-visible,
+#pp-root select:focus-visible,
+#pp-root [tabindex]:focus-visible {
+  outline: 3px solid var(--gold-dark);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pp-root * { transition: none !important; animation: none !important; }
+}
+
+#pp-root .shell { max-width: 760px; margin: 0 auto; padding: 20px 16px 90px; }
+
+#pp-root .field-header {
+  background: var(--field);
+  background-image: repeating-linear-gradient(to right, rgba(255,255,255,0.09) 0px, rgba(255,255,255,0.09) 2px, transparent 2px, transparent 46px);
+  color: #fff;
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+  position: relative;
+  overflow: hidden;
+}
+#pp-root .field-header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 0.04em; margin: 0 0 2px; }
+#pp-root .field-header p { margin: 0; color: #E8DFC4; font-size: 15px; font-weight: 500; }
+#pp-root .field-header .who { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+#pp-root .logout-btn { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.35); color: #fff; border-radius: 8px; padding: 9px 14px; cursor: pointer; font-weight: 600; font-size: 15px; }
+#pp-root .logout-btn:hover { background: rgba(255,255,255,0.24); }
+
+#pp-root .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+#pp-root .tab-btn { flex: 1 1 auto; min-width: 110px; background: var(--card); border: 2px solid var(--line); color: var(--ink-soft); border-radius: 10px; padding: 12px 10px; font-weight: 700; font-size: 16px; cursor: pointer; }
+#pp-root .tab-btn.active { background: var(--field); border-color: var(--field); color: #fff; }
+
+#pp-root .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+#pp-root .card h2 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.03em; margin: 0 0 14px; color: var(--field); }
+#pp-root .muted { color: var(--ink-soft); font-size: 15px; }
+
+#pp-root .login-wrap { display:flex; align-items:center; justify-content:center; min-height: 70vh; }
+#pp-root .login-card { width: 100%; max-width: 420px; }
+#pp-root .field-group { margin-bottom: 16px; }
+#pp-root label { display:block; font-weight: 700; margin-bottom: 6px; font-size: 15px; }
+#pp-root input[type=text], #pp-root input[type=password], #pp-root input[type=number], #pp-root input[type=datetime-local], #pp-root select {
+  width: 100%; padding: 14px 14px; border: 2px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink);
+}
+#pp-root .big-btn { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--field); color: #fff; font-weight: 800; font-size: 19px; cursor: pointer; }
+#pp-root .big-btn:hover { background: var(--field-dark); }
+#pp-root .big-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+#pp-root .link-btn { background: none; border: none; color: var(--field); font-weight: 700; text-decoration: underline; cursor: pointer; font-size: 15px; padding: 8px 0; }
+#pp-root .error-msg { background: var(--danger-bg); color: var(--danger); border-radius: 8px; padding: 10px 14px; font-weight: 600; margin-bottom: 14px; font-size: 15px; }
+
+#pp-root .game-card { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+#pp-root .game-meta { font-size: 14px; color: var(--ink-soft); margin-bottom: 10px; font-weight: 600; }
+#pp-root .pick-row { display: flex; gap: 10px; }
+#pp-root .pick-btn { flex: 1; padding: 14px 8px; border-radius: 10px; border: 2px solid var(--line); background: #fff; font-weight: 700; font-size: 16px; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; }
+#pp-root .pick-btn.selected { border-color: var(--field); background: var(--success-bg); color: var(--field); }
+#pp-root .pick-btn.selected::after { content: "\2713"; display: block; margin-top: 4px; font-size: 14px; }
+#pp-root .pick-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+#pp-root .tie-btn { flex: 0 0 90px; padding: 16px 6px; border-radius: 10px; border: 2px dashed var(--line); background: #fff; font-weight: 700; font-size: 14px; cursor: pointer; color: var(--ink-soft); }
+#pp-root .tie-btn.selected { border-color: var(--gold-dark); border-style: solid; background: #FCF3DD; color: var(--gold-dark); }
+#pp-root .result-pill { display: inline-block; font-size: 13px; font-weight: 700; border-radius: 20px; padding: 3px 10px; margin-left: 6px; }
+#pp-root .result-pill.pos { background: var(--success-bg); color: var(--success); }
+#pp-root .result-pill.neg { background: var(--danger-bg); color: var(--danger); }
+#pp-root .lock-note { font-size: 14px; color: var(--gold-dark); font-weight: 700; margin-bottom: 12px; }
+
+#pp-root .lb-row { display: flex; align-items: center; gap: 14px; padding: 12px 6px; border-bottom: 1px solid var(--line); cursor: pointer; }
+#pp-root .lb-row:last-child { border-bottom: none; }
+#pp-root .lb-rank { font-family: 'Bebas Neue', sans-serif; background: var(--gold); color: var(--field-dark); width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+#pp-root .lb-name { font-weight: 700; flex: 1; font-size: 17px; }
+#pp-root .lb-points { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--field); min-width: 50px; text-align: right; }
+#pp-root .lb-detail { padding: 4px 6px 14px 56px; font-size: 15px; color: var(--ink-soft); }
+#pp-root .week-chip { display: inline-block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; margin: 3px 6px 3px 0; font-weight: 700; font-size: 14px; }
+
+#pp-root .admin-game-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; }
+#pp-root .admin-game-row input[type=text], #pp-root .admin-game-row select { flex: 1; min-width: 110px; }
+#pp-root .remove-x { background: var(--danger-bg); color: var(--danger); border: none; border-radius: 8px; width: 38px; height: 38px; font-weight: 800; cursor: pointer; font-size: 16px; }
+#pp-root .add-game-btn { background: var(--bg); border: 2px dashed var(--line); color: var(--field); border-radius: 10px; padding: 12px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 4px; }
+#pp-root .result-btns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+#pp-root .result-btn { padding: 8px 12px; border-radius: 8px; border: 2px solid var(--line); background: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
+#pp-root .result-btn.selected { background: var(--field); border-color: var(--field); color: #fff; }
+#pp-root hr.divider { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
+
+#pp-toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: #1F4D36; color: #fff; padding: 12px 22px; border-radius: 30px; font-weight: 700; font-size: 15px; box-shadow: 0 6px 18px rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.25s ease; z-index: 999; }
+#pp-toast.show { opacity: 1; }
+
+#pp-root .empty-state { text-align: center; padding: 30px 16px; color: var(--ink-soft); }
