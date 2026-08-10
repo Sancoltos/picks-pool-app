@@ -41,7 +41,7 @@ html, body { margin: 0; padding: 0; }
   #pp-root * { transition: none !important; animation: none !important; }
 }
 
-#pp-root .shell { max-width: 760px; margin: 0 auto; padding: 20px 16px 90px; }
+#pp-root .shell { max-width: 900px; margin: 0 auto; padding: 20px 16px 90px; }
 
 #pp-root .field-header {
   background: var(--field);
