@@ -384,7 +384,9 @@
       </div>
     `;
     const rowsEl = document.getElementById('pp-lb-rows');
-    rowsEl.innerHTML = leaderboardRows.map((r, idx) => {
+    rowsEl.innerHTML = leaderboardRows
+    .filter(r => !r.isAdmin)
+    .map((r, idx) => {
       const detail = expandedUser === r.username ? renderWeeklyDetail(r) : '';
       return `
         <div>
