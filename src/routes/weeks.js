@@ -31,6 +31,7 @@ router.get('/', async (req, res) => {
       label: w.label,
       lockTime: w.lock_time,
       locked: isWeekLocked(w, weekGames),
+      picksHidden: !!w.picks_hidden,
       games: weekGames.map((g) => ({
         id: g.id,
         teamA: g.team_a,
@@ -99,6 +100,55 @@ router.post('/games/:gameId/result', requireAdmin, async (req, res) => {
 
   await pool.query('UPDATE games SET result = ? WHERE id = ?', [result, gameId]);
   res.json({ ok: true });
+});
+
+router.get('/:weekId/all-picks', async (req, res) => {
+  const weekId = Number(req.params.weekId);
+  const [weekRows] = await pool.query('SELECT id, label, picks_hidden FROM weeks WHERE id = ?', [weekId]);
+  if (!weekRows.length) return res.status(404).json({ error: 'WEEK_NOT_FOUND' });
+  const week = weekRows[0];
+
+  if (week.picks_hidden && !req.session.isAdmin) {
+    return res.status(403).json({ error: 'PICKS_HIDDEN' });
+  }
+
+  const [games] = await pool.query('SELECT id, team_a, team_b, kickoff, result FROM games WHERE week_id = ?', [weekId]);
+  const [users] = await pool.query('SELECT id, username, display_name FROM users');
+  const [picks] = await pool.query(
+    `SELECT p.user_id, p.game_id, p.pick FROM picks p
+     JOIN games g ON g.id = p.game_id
+     WHERE g.week_id = ?`,
+    [weekId]
+  );
+
+  const pickIndex = {};
+  for (const p of picks) {
+    pickIndex[p.user_id] = pickIndex[p.user_id] || {};
+    pickIndex[p.user_id][p.game_id] = p.pick;
+  }
+
+  const players = users.map((u) => ({
+    username: u.username,
+    displayName: u.display_name,
+    picks: games.map((g) => ({
+      gameId: g.id,
+      teamA: g.team_a,
+      teamB: g.team_b,
+      result: g.result,
+      pick: (pickIndex[u.id] && pickIndex[u.id][g.id]) || null,
+    })),
+  }));
+
+  res.json({ week: { id: week.id, label: week.label, picksHidden: !!week.picks_hidden }, players });
+});
+
+// Admin toggles whether everyone's picks are visible for a week.
+router.post('/:weekId/visibility', requireAdmin, async (req, res) => {
+  const weekId = Number(req.params.weekId);
+  const hidden = !!req.body?.hidden;
+  const [result] = await pool.query('UPDATE weeks SET picks_hidden = ? WHERE id = ?', [hidden, weekId]);
+  if (!result.affectedRows) return res.status(404).json({ error: 'WEEK_NOT_FOUND' });
+  res.json({ ok: true, hidden });
 });
 
 module.exports = router;

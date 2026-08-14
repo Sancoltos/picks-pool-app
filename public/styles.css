@@ -115,3 +115,12 @@ html, body { margin: 0; padding: 0; }
 #pp-toast.show { opacity: 1; }
 
 #pp-root .empty-state { text-align: center; padding: 30px 16px; color: var(--ink-soft); }
+
+
+#pp-root .others-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 10px; }
+#pp-root .player-card { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: #fff; }
+#pp-root .player-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+#pp-root .player-card-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--field); letter-spacing: 0.02em; }
+#pp-root .player-card-total { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--field); }
+#pp-root .player-card-pick { font-size: 14px; color: var(--ink-soft); padding: 6px 0; border-bottom: 1px solid var(--line); }
+#pp-root .player-card-pick:last-child { border-bottom: none; }

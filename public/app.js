@@ -65,6 +65,9 @@
   let adminDraftGames = [{ teamA: '', teamB: '', kickoff: '' }];
   let adminUsers = [];
   let leaderboardRows = [];
+  let othersSelectedWeekId = null;
+  let othersData = null;
+  let othersError = null;
 
   function showToast(msg) {
     toastEl.textContent = msg;
@@ -264,6 +267,7 @@
         <button class="tab-btn ${activeTab === 'week' ? 'active' : ''}" data-tab="week">This Week</button>
         <button class="tab-btn ${activeTab === 'board' ? 'active' : ''}" data-tab="board">Leaderboard</button>
         <button class="tab-btn ${activeTab === 'mine' ? 'active' : ''}" data-tab="mine">My Picks</button>
+        <button class="tab-btn ${activeTab === 'others' ? 'active' : ''} " data-tab="others">Others Picks</button>
         ${user.isAdmin ? `<button class="tab-btn ${activeTab === 'admin' ? 'active' : ''}" data-tab="admin">Admin</button>` : ''}
       </div>
       <div id="pp-tab-content"></div>
@@ -278,6 +282,7 @@
     else if (activeTab === 'board') renderLeaderboardTab(content);
     else if (activeTab === 'mine') renderMyPicksTab(content);
     else if (activeTab === 'admin') renderAdminTab(content);
+    else if (activeTab === 'others') renderOthersTab(content);
   }
 
   function resultLabel(g) {
@@ -452,6 +457,101 @@
     }</div>`;
   }
 
+  async function loadOthersPicks(weekId) {
+  othersError = null;
+  othersData = null;
+  try {
+    othersData = await api(`/weeks/${weekId}/all-picks`);
+  } catch (e) {
+    othersError = (e.status === 403 && e.body && e.body.error === 'PICKS_HIDDEN') ? 'HIDDEN' : 'ERROR';
+  }
+}
+
+function renderOthersTab(container) {
+  if (!weeksData.length) {
+    container.innerHTML = `<div class="card empty-state">No weeks have been posted yet.</div>`;
+    return;
+  }
+  if (!othersSelectedWeekId || !weeksData.find((w) => w.id === othersSelectedWeekId)) {
+    othersSelectedWeekId = weeksData[weeksData.length - 1].id;
+  }
+
+  let selectorHtml = '';
+  if (weeksData.length > 1) {
+    selectorHtml = `
+      <div class="field-group">
+        <label for="pp-others-week-select">Viewing:</label>
+        <select id="pp-others-week-select">
+          ${weeksData.map((w) => `<option value="${w.id}" ${w.id === othersSelectedWeekId ? 'selected' : ''}>${w.label}</option>`).join('')}
+        </select>
+      </div>`;
+  }
+
+  container.innerHTML = `
+    <div class="card">
+      <h2>Others' Picks</h2>
+      ${selectorHtml}
+      <div id="pp-others-content"><p class="muted">Loading\u2026</p></div>
+    </div>
+  `;
+
+  if (weeksData.length > 1) {
+    document.getElementById('pp-others-week-select').onchange = async (e) => {
+      othersSelectedWeekId = Number(e.target.value);
+      await loadOthersPicks(othersSelectedWeekId);
+      renderOthersContent();
+    };
+  }
+
+  loadOthersPicks(othersSelectedWeekId).then(renderOthersContent);
+}
+
+function renderOthersContent() {
+  const el = document.getElementById('pp-others-content');
+  if (!el) return;
+  if (othersError === 'HIDDEN') {
+    el.innerHTML = `<p class="muted">The admin is keeping this week's picks under wraps for now \u2014 check back after they're released.</p>`;
+    return;
+  }
+  if (othersError === 'ERROR' || !othersData) {
+    el.innerHTML = `<p class="muted">Could not load picks for this week.</p>`;
+    return;
+  }
+  const { players } = othersData;
+  if (!players.length) {
+    el.innerHTML = `<p class="muted">No players yet.</p>`;
+    return;
+  }
+  el.innerHTML = `<div class="others-grid">${players.map((p) => {
+    let weekTotal = 0;
+    let anyGraded = false;
+    const pickLines = p.picks.length ? p.picks.map((pk) => {
+      const pickText = pk.pick ? (pk.pick === 'TIE' ? 'Tie' : (pk.pick === 'TEAM_A' ? pk.teamA : pk.teamB)) : '\u2014';
+      let badge = '';
+      if (pk.result) {
+        anyGraded = true;
+        let points;
+        if (!pk.pick) points = -1;
+        else if (pk.result === 'TIE') points = pk.pick === 'TIE' ? 2 : -1;
+        else points = pk.pick === pk.result ? 1 : -1;
+        weekTotal += points;
+        badge = `<span class="result-pill ${points > 0 ? 'pos' : 'neg'}">${points > 0 ? '+' + points : points}</span>`;
+      }
+      return `<div class="player-card-pick">${pk.teamA} vs ${pk.teamB}: <strong>${pickText}</strong> ${badge}</div>`;
+    }).join('') : '<div class="muted">No games this week.</div>';
+
+    return `
+      <div class="player-card">
+        <div class="player-card-header">
+          <div class="player-card-name">${p.displayName}</div>
+          ${anyGraded ? `<div class="player-card-total">${weekTotal > 0 ? '+' + weekTotal : weekTotal}</div>` : ''}
+        </div>
+        ${pickLines}
+      </div>
+    `;
+  }).join('')}</div>`;
+}
+
   // ---------------- ADMIN ----------------
   function renderAdminTab(container) {
     container.innerHTML = `
@@ -529,8 +629,13 @@
       resultsEl.innerHTML = `<p class="muted">No weeks posted yet.</p>`;
     } else {
       resultsEl.innerHTML = weeksData.slice().reverse().map((week) => `
-        <div style="margin-bottom:16px;">
-          <strong>${week.label}</strong>
+         <div style="margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <strong>${week.label}</strong>
+      <button class="result-btn" data-toggle-visibility="${week.id}" data-hidden="${week.picksHidden}">
+        ${week.picksHidden ? 'Release Picks to Everyone' : 'Hide Picks From Everyone'}
+      </button>
+    </div>
           ${week.games.map((g) => `
             <div class="game-card">
               <div class="game-meta" style="display:flex; align-items:center; gap:6px;">
@@ -564,6 +669,21 @@
           }
         };
       });
+
+      resultsEl.querySelectorAll('[data-toggle-visibility]').forEach((btn) => {
+  btn.onclick = async () => {
+    const weekId = btn.dataset.toggleVisibility;
+    const currentlyHidden = btn.dataset.hidden === 'true';
+    try {
+      await api(`/weeks/${weekId}/visibility`, { method: 'POST', body: JSON.stringify({ hidden: !currentlyHidden }) });
+      showToast(currentlyHidden ? 'Picks released \u2014 everyone can see them now.' : 'Picks hidden for this week.');
+      await loadAppData();
+      renderAdminTab(container);
+    } catch (e) {
+      showToast('Could not update visibility for that week.');
+    }
+  };
+});
     }
 
     const usersEl = document.getElementById('pp-admin-users');
