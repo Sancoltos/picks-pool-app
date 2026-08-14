@@ -117,10 +117,18 @@ html, body { margin: 0; padding: 0; }
 #pp-root .empty-state { text-align: center; padding: 30px 16px; color: var(--ink-soft); }
 
 
-#pp-root .others-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 10px; }
-#pp-root .player-card { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: #fff; }
-#pp-root .player-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-#pp-root .player-card-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--field); letter-spacing: 0.02em; }
-#pp-root .player-card-total { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--field); }
-#pp-root .player-card-pick { font-size: 14px; color: var(--ink-soft); padding: 6px 0; border-bottom: 1px solid var(--line); }
-#pp-root .player-card-pick:last-child { border-bottom: none; }
+#pp-root .others-table-wrap { overflow-x: auto; margin-top: 10px; border: 1px solid var(--line); border-radius: 10px; }
+#pp-root .others-table { border-collapse: collapse; width: 100%; font-size: 14px; white-space: nowrap; }
+#pp-root .others-table th, #pp-root .others-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+#pp-root .others-table th { font-weight: 700; background: var(--bg); position: sticky; top: 0; }
+#pp-root .others-team-cell { font-weight: 600; }
+#pp-root .others-diff-col { text-align: center; }
+#pp-root .others-col.op1 { background: #EDEBFA; }
+#pp-root .others-col.op2 { background: #FCF3DD; }
+#pp-root .others-col.op3 { background: #E4EEF7; }
+#pp-root .others-col.op4 { background: #FBEAF0; }
+#pp-root .others-col.op5 { background: #E8F3EA; }
+#pp-root .others-col.op6 { background: #FDEEE0; }
+#pp-root .others-total-row td { font-weight: 700; background: var(--bg); }
+#pp-root .diff-pos { color: var(--success); font-weight: 700; }
+#pp-root .diff-neg { color: var(--danger); font-weight: 700; }

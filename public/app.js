@@ -522,34 +522,72 @@ function renderOthersContent() {
     el.innerHTML = `<p class="muted">No players yet.</p>`;
     return;
   }
-  el.innerHTML = `<div class="others-grid">${players.map((p) => {
-    let weekTotal = 0;
-    let anyGraded = false;
-    const pickLines = p.picks.length ? p.picks.map((pk) => {
-      const pickText = pk.pick ? (pk.pick === 'TIE' ? 'Tie' : (pk.pick === 'TEAM_A' ? pk.teamA : pk.teamB)) : '\u2014';
-      let badge = '';
-      if (pk.result) {
-        anyGraded = true;
-        let points;
-        if (!pk.pick) points = -1;
-        else if (pk.result === 'TIE') points = pk.pick === 'TIE' ? 2 : -1;
-        else points = pk.pick === pk.result ? 1 : -1;
-        weekTotal += points;
-        badge = `<span class="result-pill ${points > 0 ? 'pos' : 'neg'}">${points > 0 ? '+' + points : points}</span>`;
-      }
-      return `<div class="player-card-pick">${pk.teamA} vs ${pk.teamB}: <strong>${pickText}</strong> ${badge}</div>`;
-    }).join('') : '<div class="muted">No games this week.</div>';
+  const games = players[0].picks; // same games, same order, for every player
+  if (!games.length) {
+    el.innerHTML = `<p class="muted">No games this week.</p>`;
+    return;
+  }
 
-    return `
-      <div class="player-card">
-        <div class="player-card-header">
-          <div class="player-card-name">${p.displayName}</div>
-          ${anyGraded ? `<div class="player-card-total">${weekTotal > 0 ? '+' + weekTotal : weekTotal}</div>` : ''}
-        </div>
-        ${pickLines}
-      </div>
-    `;
-  }).join('')}</div>`;
+  const palette = ['op1', 'op2', 'op3', 'op4', 'op5', 'op6'];
+
+  function scoreFor(pk) {
+    if (!pk.result) return null;
+    if (!pk.pick) return -1;
+    if (pk.result === 'TIE') return pk.pick === 'TIE' ? 2 : -1;
+    return pk.pick === pk.result ? 1 : -1;
+  }
+
+  const headerCells = players.map((p, i) => {
+    const cls = palette[i % palette.length];
+    return `<th class="others-col ${cls}">${p.displayName}<br/>Prediction</th><th class="others-col ${cls} others-diff-col">+/-</th>`;
+  }).join('');
+
+  const bodyRows = games.map((g, gi) => {
+    const cells = players.map((p, i) => {
+      const cls = palette[i % palette.length];
+      const pk = p.picks[gi];
+      const pickText = pk.pick ? (pk.pick === 'TIE' ? 'Tie' : (pk.pick === 'TEAM_A' ? pk.teamA : pk.teamB)) : '\u2014';
+      const points = scoreFor(pk);
+      const badge = points === null ? '' : `<span class="${points > 0 ? 'diff-pos' : 'diff-neg'}">${points > 0 ? '+' + points : points}</span>`;
+      return `<td class="others-col ${cls}">${pickText}</td><td class="others-col ${cls} others-diff-col">${badge}</td>`;
+    }).join('');
+    return `<tr><td class="others-team-cell">${g.teamA}</td><td class="others-team-cell">${g.teamB}</td>${cells}</tr>`;
+  }).join('');
+
+  const totalCells = players.map((p, i) => {
+    const cls = palette[i % palette.length];
+    let total = 0;
+    let anyGraded = false;
+    p.picks.forEach((pk) => {
+      const points = scoreFor(pk);
+      if (points === null) return;
+      anyGraded = true;
+      total += points;
+    });
+    const totalText = anyGraded ? (total > 0 ? '+' + total : total) : '\u2014';
+    return `<td class="others-col ${cls}"></td><td class="others-col ${cls} others-diff-col"><strong>${totalText}</strong></td>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="others-table-wrap">
+      <table class="others-table">
+        <thead>
+          <tr>
+            <th>Away Team</th>
+            <th>Home Team</th>
+            ${headerCells}
+          </tr>
+        </thead>
+        <tbody>
+          ${bodyRows}
+          <tr class="others-total-row">
+            <td colspan="2">Total This Week</td>
+            ${totalCells}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
   // ---------------- ADMIN ----------------
