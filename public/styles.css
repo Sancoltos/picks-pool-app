@@ -126,7 +126,15 @@ html, body { margin: 0; padding: 0; }
   transform: translateX(-50%);
 }
 
-#pp-root .others-table-wrap { overflow-x: auto; margin-top: 10px; border: 1px solid var(--line); border-radius: 10px; }
+/* The wrap is its own scroll box, capped to the viewport, so the horizontal
+   scrollbar sits at its bottom edge instead of below the fold. */
+#pp-root .others-table-wrap {
+  overflow: auto;
+  max-height: calc(100vh - 160px);
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
 #pp-root .others-table { border-collapse: collapse; width: 100%; font-size: 14px; white-space: nowrap; --team-col: 130px; }
 #pp-root .others-table th, #pp-root .others-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
 #pp-root .others-table th { font-weight: 700; background: var(--bg); position: sticky; top: 0; }
