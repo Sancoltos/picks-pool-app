@@ -6,7 +6,7 @@ const router = express.Router();
 router.use(requireGate, requireAuth);
 
 router.get('/', async (req, res) => {
-  const [users] = await pool.query('SELECT id, username, display_name FROM users');
+  const [users] = await pool.query('SELECT id, username, display_name, is_admin FROM users');
   const [weeks] = await pool.query('SELECT id, label, sort_order FROM weeks ORDER BY sort_order ASC');
   const [games] = await pool.query('SELECT id, week_id, result FROM games');
   const [picks] = await pool.query('SELECT user_id, game_id, pick FROM picks');
@@ -41,6 +41,7 @@ router.get('/', async (req, res) => {
     return {
       username: u.username,
       displayName: u.display_name,
+      isAdmin: !!u.is_admin,
       total,
       weekly,
     };

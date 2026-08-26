@@ -488,7 +488,7 @@ function renderOthersTab(container) {
   }
 
   container.innerHTML = `
-    <div class="card">
+    <div class="card others-card">
       <h2>Others' Picks</h2>
       ${selectorHtml}
       <div id="pp-others-content"><p class="muted">Loading\u2026</p></div>

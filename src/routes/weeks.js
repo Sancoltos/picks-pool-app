@@ -113,7 +113,7 @@ router.get('/:weekId/all-picks', async (req, res) => {
   }
 
   const [games] = await pool.query('SELECT id, team_a, team_b, kickoff, result FROM games WHERE week_id = ?', [weekId]);
-  const [users] = await pool.query('SELECT id, username, display_name FROM users');
+  const [users] = await pool.query('SELECT id, username, display_name FROM users WHERE is_admin = FALSE');
   const [picks] = await pool.query(
     `SELECT p.user_id, p.game_id, p.pick FROM picks p
      JOIN games g ON g.id = p.game_id
