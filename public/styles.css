@@ -96,7 +96,11 @@ html, body { margin: 0; padding: 0; }
 
 #pp-root .lb-row { display: flex; align-items: center; gap: 14px; padding: 12px 6px; border-bottom: 1px solid var(--line); cursor: pointer; }
 #pp-root .lb-row:last-child { border-bottom: none; }
-#pp-root .lb-rank { font-family: 'Bebas Neue', sans-serif; background: var(--gold); color: var(--field-dark); width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+#pp-root .lb-rank { font-family: 'Bebas Neue', sans-serif; width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+#pp-root .lb-rank-gold { background: #D9A227; color: #143324; }
+#pp-root .lb-rank-silver { background: #C6C6C6; color: #2B2B2B; }
+#pp-root .lb-rank-bronze { background: #CD7F32; color: #FFFFFF; }
+#pp-root .lb-rank-other { background: #4a96ff; color: #FFFFFF; }
 #pp-root .lb-name { font-weight: 700; flex: 1; font-size: 17px; }
 #pp-root .lb-points { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--field); min-width: 50px; text-align: right; }
 #pp-root .lb-detail { padding: 4px 6px 14px 56px; font-size: 15px; color: var(--ink-soft); }
@@ -184,3 +188,9 @@ html, body { margin: 0; padding: 0; }
 }
 #pp-root .diff-pos { color: var(--success); font-weight: 700; }
 #pp-root .diff-neg { color: var(--danger); font-weight: 700; }
+
+
+
+#pp-root .move-badge { font-size: 12px; font-weight: 700; padding: 2px 6px; border-radius: 10px; margin-left: 6px; display: inline-block; }
+#pp-root .move-up { background: var(--success-bg); color: var(--success); }
+#pp-root .move-down { background: var(--danger-bg); color: var(--danger); }

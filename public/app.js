@@ -376,6 +376,32 @@
   }
 
   // ---------------- LEADERBOARD ----------------
+  function computeMovement(rows) {
+  if (!rows.length || !rows[0].weekly.length) return {};
+  let lastGradedIdx = -1;
+  rows[0].weekly.forEach((w, j) => { if (w.played) lastGradedIdx = j; });
+  if (lastGradedIdx === -1) return {}; // nothing graded yet
+
+  function rankBy(totalFn) {
+    const sorted = rows.slice().sort((a, b) => {
+      const diff = totalFn(b) - totalFn(a);
+      return diff !== 0 ? diff : a.displayName.localeCompare(b.displayName);
+    });
+    const ranks = {};
+    sorted.forEach((r, i) => { ranks[r.username] = i + 1; });
+    return ranks;
+  }
+
+  const previousRanks = rankBy((r) => r.weekly.slice(0, lastGradedIdx).reduce((sum, w) => sum + w.score, 0));
+  const currentRanks = rankBy((r) => r.total);
+
+  const movement = {};
+  rows.forEach((r) => {
+    movement[r.username] = previousRanks[r.username] - currentRanks[r.username];
+  });
+  return movement;
+}
+
   function renderLeaderboardTab(container) {
     if (!leaderboardRows.length) {
       container.innerHTML = `<div class="card empty-state">No players yet.</div>`;
@@ -389,21 +415,26 @@
       </div>
     `;
     const rowsEl = document.getElementById('pp-lb-rows');
-    rowsEl.innerHTML = leaderboardRows
-    .filter(r => !r.isAdmin)
-    .map((r, idx) => {
-      const detail = expandedUser === r.username ? renderWeeklyDetail(r) : '';
-      return `
-        <div>
-          <div class="lb-row" data-user="${r.username}">
-            <div class="lb-rank display">${idx + 1}</div>
-            <div class="lb-name">${r.displayName}${r.username === user.username ? ' (you)' : ''}</div>
-            <div class="lb-points display">${r.total}</div>
-          </div>
-          ${detail}
-        </div>
-      `;
-    }).join('');
+const movement = computeMovement(leaderboardRows);
+rowsEl.innerHTML = leaderboardRows
+.filter(r => !r.isAdmin)
+.map((r, idx) => {
+  const detail = expandedUser === r.username ? renderWeeklyDetail(r) : '';
+  const delta = movement[r.username] || 0;
+  let moveBadge = '';
+  if (delta > 0) moveBadge = `<span class="move-badge move-up">\u25B2${delta}</span>`;
+  else if (delta < 0) moveBadge = `<span class="move-badge move-down">\u25BC${Math.abs(delta)}</span>`;
+  return `
+    <div>
+      <div class="lb-row" data-user="${r.username}">
+        <div class="lb-rank display lb-rank-${idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : 'other'}">${idx + 1}</div>
+        <div class="lb-name">${r.displayName}${r.username === user.username ? ' (you)' : ''} ${moveBadge}</div>
+        <div class="lb-points display">${r.total}</div>
+      </div>
+      ${detail}
+    </div>
+  `;
+}).join('');
     rowsEl.querySelectorAll('.lb-row').forEach((row) => {
       row.onclick = () => {
         const u = row.dataset.user;
