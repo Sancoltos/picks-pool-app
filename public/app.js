@@ -293,7 +293,7 @@
   }
 
   // ---------------- THIS WEEK ----------------
-  function renderWeekTab(container) {
+function renderWeekTab(container) {
     if (!weeksData.length) {
       container.innerHTML = `<div class="card empty-state">No weeks have been posted yet. Check back soon!</div>`;
       return;
@@ -335,20 +335,23 @@
     gamesEl.innerHTML = week.games.map((g) => {
       let resultBadge = '';
       if (g.result) {
-        if (g.myPick) {
-          const correct = g.result === 'TIE' ? g.myPick === 'TIE' : g.myPick === g.result;
-          resultBadge = `<span class="result-pill ${correct ? 'pos' : 'neg'}">${correct ? (g.result === 'TIE' ? '+2' : '+1') : '\u22121'}</span>`;
-        } else {
+        if (!g.myPick) {
           resultBadge = `<span class="result-pill neg">\u22121 (no pick)</span>`;
+        } else if (g.result === 'TIE') {
+          const points = (g.myPick === 'TIE') ? 2 : 0;
+          resultBadge = `<span class="result-pill ${points > 0 ? 'pos' : ''}">${points > 0 ? '+2' : '0'}</span>`;
+        } else {
+          const correct = g.myPick === g.result;
+          resultBadge = `<span class="result-pill ${correct ? 'pos' : 'neg'}">${correct ? '+1' : '\u22121'}</span>`;
         }
       }
       return `
         <div class="game-card">
           <div class="game-meta">${g.kickoff || ''} ${resultBadge}</div>
           <div class="pick-row">
-            <button class="pick-btn ${g.myPick === 'TEAM_A' ? 'selected' : ''}" data-game="${g.id}" data-pick="TEAM_A" ${week.locked ? 'disabled' : ''}>${logoImg(g.teamA, 44)}${g.teamA}</button>
-            <button class="pick-btn ${g.myPick === 'TEAM_B' ? 'selected' : ''}" data-game="${g.id}" data-pick="TEAM_B" ${week.locked ? 'disabled' : ''}>${logoImg(g.teamB, 44)}${g.teamB}</button>
-            <button class="tie-btn ${g.myPick === 'TIE' ? 'selected' : ''}" data-game="${g.id}" data-pick="TIE" ${week.locked ? 'disabled' : ''}>Tie</button>
+            <button class="pick-btn ${g.myPick === 'TEAM_A' ? 'selected' : ''}" data-game="${g.id}" data-pick="TEAM_A" ${(week.locked || g.result) ? 'disabled' : ''}>${logoImg(g.teamA, 44)}${g.teamA}</button>
+            <button class="pick-btn ${g.myPick === 'TEAM_B' ? 'selected' : ''}" data-game="${g.id}" data-pick="TEAM_B" ${(week.locked || g.result) ? 'disabled' : ''}>${logoImg(g.teamB, 44)}${g.teamB}</button>
+            <button class="tie-btn ${g.myPick === 'TIE' ? 'selected' : ''}" data-game="${g.id}" data-pick="TIE" ${(week.locked || g.result) ? 'disabled' : ''}>Tie</button>
           </div>
           ${g.result ? `<div class="game-meta" style="margin-top:8px;margin-bottom:0;">Final: ${resultLabel(g)}</div>` : ''}
         </div>
@@ -364,7 +367,7 @@
           renderWeekTab(container);
         } catch (e) {
           if (e.status === 403) {
-            showToast('This week is locked — results are already posted.');
+            showToast('This game is locked — results are already posted.');
             await loadAppData();
             renderWeekTab(container);
           } else {
@@ -564,7 +567,7 @@ function renderOthersContent() {
   function scoreFor(pk) {
     if (!pk.result) return null;
     if (!pk.pick) return -1;
-    if (pk.result === 'TIE') return pk.pick === 'TIE' ? 2 : -1;
+    if (pk.result === 'TIE') return pk.pick === 'TIE' ? 2 : 0;
     return pk.pick === pk.result ? 1 : -1;
   }
 

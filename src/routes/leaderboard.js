@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
       played++;
       const pick = pickIndex[userId] && pickIndex[userId][g.id];
       if (!pick) { score -= 1; continue; }
-      if (g.result === 'TIE') score += pick === 'TIE' ? 2 : -1;
+      if (g.result === 'TIE') score += pick === 'TIE' ? 2 : 0;
       else score += pick === g.result ? 1 : -1;
     }
     return { score, played };

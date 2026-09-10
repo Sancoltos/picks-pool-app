@@ -9,10 +9,10 @@ router.use(requireGate, requireAuth);
 // games has a posted result — whichever comes first. This is enforced here,
 // server-side, so a stray click on an old week can never change a pick after
 // results are in, no matter what the UI does.
-function isWeekLocked(week, games) {
-  const timeLocked = week.lock_time && new Date() > new Date(week.lock_time);
-  const resultLocked = games.some((g) => g.result !== null);
-  return !!(timeLocked || resultLocked);
+function isWeekLocked(week) {
+  // "Locked" here now means the pre-game deadline has passed — individual
+  // games lock separately, the moment THEIR OWN result is posted.
+  return !!(week.lock_time && new Date() > new Date(week.lock_time));
 }
 
 router.get('/', async (req, res) => {
@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
       id: w.id,
       label: w.label,
       lockTime: w.lock_time,
-      locked: isWeekLocked(w, weekGames),
+      locked: isWeekLocked(w),
       picksHidden: !!w.picks_hidden,
       games: weekGames.map((g) => ({
         id: g.id,
