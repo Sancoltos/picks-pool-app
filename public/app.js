@@ -68,6 +68,9 @@
   let othersSelectedWeekId = null;
   let othersData = null;
   let othersError = null;
+  let adminPickUsername = null;
+  let adminPickWeekId = null;
+  let adminPickData = null;
 
   function showToast(msg) {
     toastEl.textContent = msg;
@@ -456,6 +459,8 @@ rowsEl.innerHTML = leaderboardRows
     return `<div class="lb-detail">${chips}</div>`;
   }
 
+  
+
   // ---------------- MY PICKS ----------------
   function renderMyPicksTab(container) {
     if (!weeksData.length) {
@@ -651,6 +656,24 @@ function renderOthersContent() {
         <h2>Reset a Player's PIN</h2>
         <div id="pp-admin-users"></div>
       </div>
+      <div class="card">
+  <h2>Make a Pick for Someone</h2>
+  <div class="field-group">
+    <label for="pp-pick-user">Player</label>
+    <select id="pp-pick-user">
+      <option value="">Select a player</option>
+      ${adminUsers.map((u) => `<option value="${u.username}" ${u.username === adminPickUsername ? 'selected' : ''}>${u.display_name}</option>`).join('')}
+    </select>
+  </div>
+  <div class="field-group">
+    <label for="pp-pick-week">Week</label>
+    <select id="pp-pick-week">
+      <option value="">Select a week</option>
+      ${weeksData.map((w) => `<option value="${w.id}" ${w.id === adminPickWeekId ? 'selected' : ''}>${w.label}</option>`).join('')}
+    </select>
+  </div>
+  <div id="pp-admin-pick-games"></div>
+</div>
     `;
 
     function renderDraftGames(){
@@ -785,6 +808,70 @@ function renderOthersContent() {
         };
       });
     }
+    document.getElementById('pp-pick-user').onchange = (e) => {
+  adminPickUsername = e.target.value || null;
+  renderAdminPickGames();
+};
+
+document.getElementById('pp-pick-week').onchange = async (e) => {
+  adminPickWeekId = e.target.value ? Number(e.target.value) : null;
+  adminPickData = null;
+  if (adminPickWeekId) {
+    try { adminPickData = await api(`/weeks/${adminPickWeekId}/all-picks`); } catch (err) { adminPickData = null; }
+  }
+  renderAdminPickGames();
+};
+
+async function renderAdminPickGames() {
+  const el = document.getElementById('pp-admin-pick-games');
+  if (!el) return;
+  if (!adminPickUsername || !adminPickWeekId) {
+    el.innerHTML = '<p class="muted">Choose a player and a week.</p>';
+    return;
+  }
+  if (!adminPickData) {
+    try { adminPickData = await api(`/weeks/${adminPickWeekId}/all-picks`); } catch (err) {
+      el.innerHTML = '<p class="muted">Could not load that week.</p>';
+      return;
+    }
+  }
+  const week = weeksData.find((w) => w.id === adminPickWeekId);
+  const player = adminPickData.players.find((p) => p.username === adminPickUsername);
+  const targetUser = adminUsers.find((u) => u.username === adminPickUsername);
+  if (!week || !player || !targetUser) {
+    el.innerHTML = '<p class="muted">Could not load that combination.</p>';
+    return;
+  }
+
+  el.innerHTML = player.picks.map((pk) => {
+    const locked = week.locked || pk.result;
+    return `
+      <div class="game-card">
+        <div class="game-meta">${pk.teamA} vs ${pk.teamB}${pk.result ? ` \u2014 Final: ${pk.result === 'TIE' ? 'Tie' : (pk.result === 'TEAM_A' ? pk.teamA : pk.teamB)}` : ''}</div>
+        <div class="pick-row">
+          <button class="pick-btn ${pk.pick === 'TEAM_A' ? 'selected' : ''}" data-game="${pk.gameId}" data-pick="TEAM_A" ${locked ? 'disabled' : ''}>${pk.teamA}</button>
+          <button class="pick-btn ${pk.pick === 'TEAM_B' ? 'selected' : ''}" data-game="${pk.gameId}" data-pick="TEAM_B" ${locked ? 'disabled' : ''}>${pk.teamB}</button>
+          <button class="tie-btn ${pk.pick === 'TIE' ? 'selected' : ''}" data-game="${pk.gameId}" data-pick="TIE" ${locked ? 'disabled' : ''}>Tie</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  el.querySelectorAll('button[data-game]').forEach((btn) => {
+    btn.onclick = async () => {
+      try {
+        await api('/admin/picks', { method: 'POST', body: JSON.stringify({ userId: targetUser.id, gameId: Number(btn.dataset.game), pick: btn.dataset.pick }) });
+        showToast(`Pick saved for ${targetUser.display_name}.`);
+        adminPickData = await api(`/weeks/${adminPickWeekId}/all-picks`);
+        renderAdminPickGames();
+      } catch (err) {
+        showToast('Could not save that pick \u2014 the game may be locked.');
+      }
+    };
+  });
+}
+
+renderAdminPickGames();
   }
 
   // ---------------- INIT ----------------
